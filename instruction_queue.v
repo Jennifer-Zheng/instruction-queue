@@ -1,18 +1,14 @@
 /*
-for the instr queue, determine which reservation station by determining what type of operation it is (ex. floating point add)
-- MUST BE FIFO, must block if RS not available, even if next instruction is good to go
+Instruction queue is implemented as a circular buffer. 
+
+Key notes:
+- The queue itself is a fixed size array (8 instructions * 76 bits for instructions + metadata).
+- We keep track of the start index and the end index of the queue. 
+- The start index is the next instruction to be dispatched.
+- The end index is where the new instruction will be appended to the queue.
+- We keep a counter of the number of instructions currently in the queue. We stall if the counter hits capacity.
 */
-/*
-1. decide on queue size
-2. clock? every clock cycle get a instruction 
-- keep track of start and end of queue
-- full: counter of entries = queue size
-3. how are instructions encoded?
-- 
-4. need a wire(?) to each reservation station/buffers
-- reservation stations for adder, multiplier, load/store buffer, reorder buffer, integer
-- incoming wire from each buffer to say if it's empty
-*/
+
 module instruction_queue (
 input wire clk,
 input wire[3:0] MajorOpcode_in,
@@ -46,18 +42,34 @@ integer start_idx = 0;
 // Location to append next item (aka end of queue)
 integer end_idx = 0;
 
- // Holds concatenation of the instruction metadata
-reg [75:0] instruction;
-
 // Number of instructions that are currently in the queue
 integer counter = 0;
 
-always @(posedge clk) begin
-    stall_out <= stall_in;
-    instruction[75:0]  <= {MajorOpcode_in, Source1_in, Source2_in, OffsetScale_in, Destination_in, MinorOpcode_in, HasAddress_in, Address_in, OffsetSub_in, stall_in};
-    $display("instruction bits: %b", instruction);
-    //if(stall_in != 1) {
+// Holds concatenation of the instruction metadata
+reg [75:0] instruction;
 
-    //}
+always @(posedge clk) begin
+    // Queue is not yet at capacity so we can continue
+    if(counter != 8) begin
+        stall_out <= stall_in;
+        instruction[75:0]  <= {MajorOpcode_in, Source1_in, Source2_in, OffsetScale_in, Destination_in, MinorOpcode_in, HasAddress_in, Address_in, OffsetSub_in, stall_in};
+        $display("instruction bits: %b", instruction);
+        queue[end_idx] <= instruction;
+        $display("queue info: %b", queue[end_idx]);
+        end_idx = end_idx + 1;
+        $display("end_idx: %d", end_idx);
+        counter = counter + 1;
+        $display("counter: %d", counter);
+
+        // Reset end_idx when we reach the end of the queue
+        if(end_idx == 7) begin
+            end_idx = 0;
+        end
+    
+    end 
+    else begin
+        // Queue is at capacity so stall until we have an empty slot.
+
+    end 
 end
 endmodule /* main */
