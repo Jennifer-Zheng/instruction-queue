@@ -46,16 +46,18 @@ integer start_idx = 0;
 // Location to append next item (aka end of queue)
 integer end_idx = 0;
 
+ // Holds concatenation of the instruction metadata
+reg [75:0] instruction;
 // Number of instructions that are currently in the queue
 integer counter = 0;
+    always @(posedge clk)
+      begin
+        stall_out <= stall_in;
+        instruction[75:0]  <= {MajorOpcode_in, Source1_in, Source2_in, OffsetScale_in, Destination_in, MinorOpcode_in, HasAddress_in, Address_in, OffsetSub_in};
+        $display("TEST");
+        
+        //if(stall_in != 1) {
 
-    always @(posedge clk) begin
-        stall_out = stall_in;
-        reg [75:0] instruction = {MajorOpcode_in, Source1_in, Source2_in, OffsetScale_in, Destination_in, MinorOpcode_in,
-        HasAddress_in, Address_in, OffsetSub_in}
-        //$display(instruction)
-        if(stall_in != 1) {
-
-        }
-    end
+        //}
+      end
 endmodule /* main */
