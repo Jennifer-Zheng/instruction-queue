@@ -2,7 +2,7 @@
 Instruction queue is implemented as a circular buffer. 
 
 Key notes:
-- The queue itself is a fixed size array (8 instructions * 76 bits for instructions + metadata).
+- The queue itself is a fixed size array (8 instructions * 75 bits for instructions + metadata).
 - We keep track of the start index and the end index of the queue. 
 - The start index is the next instruction to be dispatched.
 - The end index is where the new instruction will be appended to the queue.
@@ -33,7 +33,7 @@ output reg OffsetSub_out,
 output reg stall_out
 );
 
-// Instruction queue: 76 bits wide * 8 entries
+// Instruction queue: 75 bits wide * 8 entries
 reg [74:0] queue [7:0];
 
 // Location of next instruction to dispatch (aka start of queue)
@@ -118,4 +118,4 @@ always @(posedge clk) begin
     test = test + 1;
     end
 end
-endmodule /* main */
+endmodule 
